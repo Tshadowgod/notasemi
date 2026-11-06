@@ -135,6 +135,19 @@
   }
   .hint button { border: 0; background: none; color: var(--blue-500); cursor: pointer; padding: 0; font: inherit; font-size: .8rem; text-decoration: underline; }
   .optativo { margin-top: 20px; }
+  .need-card { margin-top: 20px; }
+  .need-card[hidden] { display: none; }
+  .need-list { display: grid; gap: 12px; margin-top: 14px; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); }
+  .need-row {
+    background: var(--yellow-soft); border-left: 4px solid var(--yellow); border-radius: 12px; padding: 12px 14px;
+  }
+  .need-head { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+  .need-name { font-weight: 700; }
+  .need-val {
+    background: var(--yellow); color: var(--blue-900); font-weight: 800; font-size: 1.1rem;
+    padding: 2px 14px; border-radius: 999px; font-variant-numeric: tabular-nums;
+  }
+  .need-row p { margin: 6px 0 0; color: var(--yellow-ink); font-weight: 600; font-size: .9rem; }
   .desc { margin: 8px 0 0; color: var(--muted); font-size: .88rem; }
   .desc b { color: var(--text); font-weight: 600; }
   .opt-row { display: flex; flex-wrap: wrap; gap: 18px; margin-top: 14px; align-items: flex-end; }
@@ -213,6 +226,11 @@
 <main>
 
   <div class="grid" id="parciales"></div>
+
+  <div class="card need-card" id="need-card" hidden>
+    <h2>Lo que necesitas para aprobar <small>5,1</small></h2>
+    <div class="need-list" id="need-list"></div>
+  </div>
 
   <div class="card optativo">
     <h2>Examen optativo <small>80% · 20%</small></h2>
@@ -515,6 +533,7 @@ function update() {
   const pesoPend = pendientes.reduce((a, p) => a + p.peso, 0);
   const req = pendientes.length ? (state.min - final) / pesoPend : null;
 
+  const necesita = [];
   PARCIALES.forEach(p => {
     const hint = document.getElementById(`hint-${p.id}`);
     const calc = notaCalculada(p.id);
@@ -534,21 +553,39 @@ function update() {
       hint.appendChild(b);
     }
     if (!pendientes.includes(p) || completos.length === 0) return;
-    hint.className = "hint need";
-    if (req <= 0) { hint.textContent = "Ya aprobaste aunque saques 0 en este parcial."; return; }
-    if (req > state.max) { hint.textContent = `Necesitarías ${fmt(req)}: ya no alcanza.`; return; }
-    let txt = `Para aprobar necesitas ${fmt(req)} en este parcial`;
-    const prac = avg(state[p.id].practica), ctrl = avg(state[p.id].controles);
-    if (prac !== null || ctrl !== null) {
-      const aporte = (prac ?? 0) * 0.16 + (ctrl ?? 0) * 0.24;
-      const ex = (req - aporte) / 0.6;
-      txt += ex <= 0 ? " (ya lo cubres con práctica y controles)."
-        : ex > state.max ? ` → en el examen necesitarías ${fmt(ex)}, no alcanza.`
-        : ` → en el examen necesitas al menos ${fmt(ex)}.`;
-    } else {
-      txt += ".";
+    let txt;
+    if (req <= 0) txt = "Ya aprobaste aunque saques 0 en este parcial.";
+    else if (req > state.max) txt = `Necesitarías ${fmt(req)}: ya no alcanza.`;
+    else {
+      txt = `Necesitas ${fmt(req)} en este parcial`;
+      const prac = avg(state[p.id].practica), ctrl = avg(state[p.id].controles);
+      if (prac !== null || ctrl !== null) {
+        const aporte = (prac ?? 0) * 0.16 + (ctrl ?? 0) * 0.24;
+        const ex = (req - aporte) / 0.6;
+        txt += ex <= 0 ? " (ya lo cubres con práctica y controles)."
+          : ex > state.max ? ` → en el examen necesitarías ${fmt(ex)}, no alcanza.`
+          : ` → en el examen necesitas al menos ${fmt(ex)}.`;
+      } else {
+        txt += ".";
+      }
     }
-    hint.textContent = txt;
+    necesita.push({ nombre: p.nombre, txt, req });
+  });
+
+  const needCard = document.getElementById("need-card");
+  const needList = document.getElementById("need-list");
+  needCard.hidden = necesita.length === 0;
+  needList.innerHTML = "";
+  necesita.forEach(n => {
+    const row = document.createElement("div");
+    row.className = "need-row";
+    const name = document.createElement("span"); name.className = "need-name"; name.textContent = n.nombre;
+    const val = document.createElement("span"); val.className = "need-val";
+    val.textContent = n.req > 0 && n.req <= state.max ? fmt(n.req) : n.req <= 0 ? "✓" : "✕";
+    const t = document.createElement("p"); t.textContent = n.txt;
+    const head = document.createElement("div"); head.className = "need-head"; head.append(name, val);
+    row.append(head, t);
+    needList.appendChild(row);
   });
 
   const finalEl = document.getElementById("final");
