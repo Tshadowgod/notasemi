@@ -103,7 +103,11 @@
   .total input.num::placeholder { color: rgba(255,255,255,.5); }
   .total input.num:hover, .total input.num:focus { border-color: var(--yellow); outline: none; background: rgba(255,255,255,.08); }
   .total input.num.manual { color: #fff; text-decoration: underline wavy var(--yellow) 1px; text-underline-offset: 5px; }
-  .edit-tip { font-size: .78rem; color: var(--muted); margin-top: 6px; }
+  .edit-tip {
+    margin-top: 8px; padding: 8px 12px; border-radius: 10px;
+    background: var(--yellow-soft); color: var(--yellow-ink); border-left: 4px solid var(--yellow);
+    font-size: .9rem; font-weight: 600;
+  }
   .hint { font-size: .8rem; color: var(--muted); margin-top: 8px; min-height: 1.1em; }
   .total input.num.opt { color: var(--yellow); text-decoration: none; }
   .hint.opt {
