@@ -387,7 +387,7 @@ function render() {
     SECCIONES.forEach(s => {
       const sec = document.createElement("div");
       sec.className = "section";
-      sec.innerHTML = `<div class="section-head"><span>${s.nombre}</span><span class="sec-val" id="val-${p.id}-${s.id}" hidden></span></div>`;
+      sec.innerHTML = `<div class="section-head"><span>${s.nombre}</span></div>`;
       const notes = document.createElement("div");
       notes.className = "notes";
       state[p.id][s.id].forEach((val, i) => {
@@ -471,9 +471,6 @@ function update() {
       const a = avg(state[p.id][s.id]);
       document.getElementById(`avg-${p.id}-${s.id}`).textContent =
         a === null ? "Sin notas" : `Promedio: ${fmt(a)} → aporta ${fmt(a * s.peso)}`;
-      const v = document.getElementById(`val-${p.id}-${s.id}`);
-      v.hidden = a === null;
-      v.textContent = a === null ? "" : fmt(a);
     });
     // Práctica (40%) + Controles (60%) = nota del 40% del parcial
     {
