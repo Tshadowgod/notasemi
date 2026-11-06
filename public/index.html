@@ -231,7 +231,7 @@
     </div>
     <div class="visitas" id="visitas" hidden>
       <span class="v-dot" aria-hidden="true"></span>
-      <span><b id="v-personas">0</b> personas usaron la calculadora · <b id="v-hoy">0</b> hoy</span>
+      <span><b id="v-personas">0</b> personas usaron la calculadora</span>
     </div>
   </div>
 </div>
@@ -702,7 +702,6 @@ async function contarVisita() {
     const j = await r.json();
     try { sessionStorage.setItem("emi-visita", "1"); } catch (e) {}
     document.getElementById("v-personas").textContent = j.personas.toLocaleString("es-BO");
-    document.getElementById("v-hoy").textContent = j.hoy.toLocaleString("es-BO");
     document.getElementById("visitas").hidden = false;
   } catch (e) {}
 }
