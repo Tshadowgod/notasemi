@@ -72,6 +72,17 @@
   .section { margin-top: 16px; }
   .section-head { display: flex; justify-content: space-between; gap: 8px; font-size: .9rem; font-weight: 600; margin-bottom: 8px; }
   .section-head { align-items: center; }
+  .sub-total {
+    margin-top: 14px; padding: 10px 14px; border-radius: 12px;
+    display: flex; justify-content: space-between; align-items: center; gap: 8px;
+    border: 1.5px dashed var(--yellow); font-weight: 600; font-size: .9rem;
+  }
+  .sub-total[hidden], .sec-val[hidden] { display: none; }
+  .sub-total small { color: var(--muted); font-weight: 500; }
+  .sub-num {
+    background: var(--yellow); color: var(--blue-900); font-weight: 800; font-size: 1.05rem;
+    padding: 3px 14px; border-radius: 999px; font-variant-numeric: tabular-nums;
+  }
   .sec-val {
     background: var(--yellow); color: var(--blue-900); font-weight: 800; font-size: .95rem;
     padding: 2px 12px; border-radius: 999px; font-variant-numeric: tabular-nums;
@@ -414,6 +425,11 @@ function render() {
       a.className = "avg"; a.id = `avg-${p.id}-${s.id}`;
       sec.appendChild(a);
       card.appendChild(sec);
+      if (s.id === "controles") {
+        const sub = document.createElement("div");
+        sub.className = "sub-total"; sub.id = `sub-${p.id}`; sub.hidden = true;
+        card.appendChild(sub);
+      }
     });
     const tot = document.createElement("div");
     tot.className = "total";
@@ -459,6 +475,17 @@ function update() {
       v.hidden = a === null;
       v.textContent = a === null ? "" : fmt(a);
     });
+    // Práctica (40%) + Controles (60%) = nota del 40% del parcial
+    {
+      const prac = avg(state[p.id].practica), ctrl = avg(state[p.id].controles);
+      const sub = document.getElementById(`sub-${p.id}`);
+      sub.hidden = prac === null && ctrl === null;
+      if (!sub.hidden) {
+        const n = (prac ?? 0) * 0.4 + (ctrl ?? 0) * 0.6;
+        sub.innerHTML = `<span>Práctica + Controles <small>(40% del parcial)</small></span>` +
+          `<span class="sub-num">${fmt(n)}</span>`;
+      }
+    }
     const ti = document.getElementById(`tot-${p.id}`);
     const calc = notaCalculada(p.id);
     const esManual = (state[p.id].manual ?? "") !== "";
