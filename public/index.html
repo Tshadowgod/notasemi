@@ -71,7 +71,11 @@
   }
   .section { margin-top: 16px; }
   .section-head { display: flex; justify-content: space-between; gap: 8px; font-size: .9rem; font-weight: 600; margin-bottom: 8px; }
-  .section-head span:last-child { color: var(--muted); font-weight: 500; font-size: .8rem; }
+  .section-head { align-items: center; }
+  .sec-val {
+    background: var(--yellow); color: var(--blue-900); font-weight: 800; font-size: .95rem;
+    padding: 2px 12px; border-radius: 999px; font-variant-numeric: tabular-nums;
+  }
   .notes { display: flex; flex-wrap: wrap; gap: 8px; }
   .note {
     display: flex; align-items: center; background: var(--input-bg);
@@ -372,7 +376,7 @@ function render() {
     SECCIONES.forEach(s => {
       const sec = document.createElement("div");
       sec.className = "section";
-      sec.innerHTML = `<div class="section-head"><span>${s.nombre}</span></div>`;
+      sec.innerHTML = `<div class="section-head"><span>${s.nombre}</span><span class="sec-val" id="val-${p.id}-${s.id}" hidden></span></div>`;
       const notes = document.createElement("div");
       notes.className = "notes";
       state[p.id][s.id].forEach((val, i) => {
@@ -451,6 +455,9 @@ function update() {
       const a = avg(state[p.id][s.id]);
       document.getElementById(`avg-${p.id}-${s.id}`).textContent =
         a === null ? "Sin notas" : `Promedio: ${fmt(a)} → aporta ${fmt(a * s.peso)}`;
+      const v = document.getElementById(`val-${p.id}-${s.id}`);
+      v.hidden = a === null;
+      v.textContent = a === null ? "" : fmt(a);
     });
     const ti = document.getElementById(`tot-${p.id}`);
     const calc = notaCalculada(p.id);
