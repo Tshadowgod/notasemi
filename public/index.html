@@ -54,6 +54,14 @@
     padding: 5px 12px; border-radius: 999px; font-size: .82rem;
   }
   .chips b { color: var(--yellow); }
+  .visitas {
+    display: inline-flex; align-items: center; gap: 10px; margin-top: 16px;
+    background: var(--yellow); color: var(--blue-900); font-size: .9rem; font-weight: 500;
+    padding: 7px 16px; border-radius: 999px;
+  }
+  .visitas[hidden] { display: none; }
+  .visitas b { font-weight: 800; font-variant-numeric: tabular-nums; }
+  .v-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--blue-700); box-shadow: 0 0 0 3px rgba(18,67,168,.25); }
   main { max-width: 1040px; margin: -60px auto 0; padding: 0 16px 48px; }
   .grid { display: grid; gap: 18px; grid-template-columns: repeat(auto-fit, minmax(290px, 1fr)); }
   .card {
@@ -220,6 +228,10 @@
     <div class="chips">
       <span>1er Parcial <b>30%</b></span><span>2do Parcial <b>30%</b></span><span>Parcial Final <b>40%</b></span>
       <span>Práctica + Controles <b>40%</b></span><span>Examen <b>60%</b></span>
+    </div>
+    <div class="visitas" id="visitas" hidden>
+      <span class="v-dot" aria-hidden="true"></span>
+      <span><b id="v-personas">0</b> personas usaron la calculadora · <b id="v-hoy">0</b> hoy</span>
     </div>
   </div>
 </div>
@@ -677,6 +689,23 @@ document.getElementById("copiar").addEventListener("click", async e => {
 
 render();
 loadRemote();
+contarVisita();
+
+async function contarVisita() {
+  if (!ONLINE) return;
+  let yaContada = false;
+  try { yaContada = sessionStorage.getItem("emi-visita") === "1"; } catch (e) {}
+  try {
+    const r = await fetch(yaContada ? "/api/visitas" : `/api/visitas?id=${encodeURIComponent(ID)}`,
+      { method: yaContada ? "GET" : "POST" });
+    if (!r.ok) return;
+    const j = await r.json();
+    try { sessionStorage.setItem("emi-visita", "1"); } catch (e) {}
+    document.getElementById("v-personas").textContent = j.personas.toLocaleString("es-BO");
+    document.getElementById("v-hoy").textContent = j.hoy.toLocaleString("es-BO");
+    document.getElementById("visitas").hidden = false;
+  } catch (e) {}
+}
 </script>
 </body>
 </html>
