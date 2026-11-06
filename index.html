@@ -1,0 +1,606 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Calculadora de Notas EMI</title>
+<link rel="icon" href="logo.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --blue-900: #0a2a66; --blue-700: #1243a8; --blue-500: #2563eb; --blue-100: #e5edff; --blue-50: #f3f7ff;
+    --yellow: #ffc61a; --yellow-soft: #fff6d6; --yellow-ink: #6b4e00;
+    --bg: #eef3fc; --card: #ffffff; --text: #0f1f44; --muted: #5d6b8a; --border: #d9e3f7;
+    --input-bg: #f3f7ff; --ok: #138a4a; --ok-soft: #e0f6ea; --bad: #d23b3b; --bad-soft: #fde8e8;
+    --shadow: 0 10px 30px -12px rgba(18, 67, 168, .25);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #07132e; --card: #0f1f45; --text: #f2f5ff; --muted: #9fb0d6; --border: #1f3266;
+      --input-bg: #0a1838; --blue-100: #17306b; --blue-50: #0c1b3f;
+      --yellow-soft: #3a2f0a; --yellow-ink: #ffd75a;
+      --ok: #4fd18b; --ok-soft: #10351f; --bad: #ff7b7b; --bad-soft: #3d1414;
+      --shadow: 0 10px 30px -12px rgba(0, 0, 0, .6);
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--text);
+    font-family: "Poppins", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    line-height: 1.45;
+  }
+  .hero {
+    background: radial-gradient(1200px 300px at 85% -40%, rgba(255,198,26,.35), transparent 60%),
+                linear-gradient(135deg, var(--blue-900), var(--blue-700) 60%, var(--blue-500));
+    color: #fff; padding: 36px 16px 90px;
+  }
+  .hero-inner { max-width: 1040px; margin: 0 auto; }
+  .brand { display: flex; flex-wrap: wrap; align-items: center; gap: 14px; }
+  .logo {
+    height: 88px; width: auto; background: #fff; padding: 6px 10px; border-radius: 14px;
+    box-shadow: 0 6px 18px -6px rgba(0,0,0,.35);
+  }
+  .tag {
+    display: inline-block; background: var(--yellow); color: var(--blue-900);
+    font-weight: 700; font-size: .75rem; letter-spacing: .08em; padding: 4px 10px; border-radius: 999px;
+  }
+  .hero h1 { margin: 12px 0 8px; font-size: clamp(1.7rem, 4vw, 2.4rem); font-weight: 800; letter-spacing: -.02em; }
+  .hero h1 span { color: var(--yellow); }
+  .hero p { margin: 0; color: rgba(255,255,255,.82); font-size: .95rem; max-width: 720px; }
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
+  .chips span {
+    background: rgba(255,255,255,.12); border: 1px solid rgba(255,255,255,.2);
+    padding: 5px 12px; border-radius: 999px; font-size: .82rem;
+  }
+  .chips b { color: var(--yellow); }
+  main { max-width: 1040px; margin: -60px auto 0; padding: 0 16px 48px; }
+  .grid { display: grid; gap: 18px; grid-template-columns: repeat(auto-fit, minmax(290px, 1fr)); }
+  .card {
+    background: var(--card); border: 1px solid var(--border); border-radius: 20px;
+    padding: 20px; box-shadow: var(--shadow); position: relative; overflow: hidden;
+  }
+  .card::before {
+    content: ""; position: absolute; inset: 0 0 auto 0; height: 4px;
+    background: linear-gradient(90deg, var(--yellow), var(--blue-500));
+  }
+  .card h2 { margin: 0; font-size: 1.15rem; font-weight: 700; display: flex; justify-content: space-between; align-items: center; }
+  .card h2 small {
+    background: var(--blue-700); color: var(--yellow); font-weight: 700; font-size: .8rem;
+    padding: 3px 10px; border-radius: 999px;
+  }
+  .section { margin-top: 16px; }
+  .section-head { display: flex; justify-content: space-between; gap: 8px; font-size: .9rem; font-weight: 600; margin-bottom: 8px; }
+  .section-head span:last-child { color: var(--muted); font-weight: 500; font-size: .8rem; }
+  .notes { display: flex; flex-wrap: wrap; gap: 8px; }
+  .note {
+    display: flex; align-items: center; background: var(--input-bg);
+    border: 1.5px solid var(--border); border-radius: 12px; overflow: hidden; transition: border-color .15s, box-shadow .15s;
+  }
+  .note:focus-within { border-color: var(--yellow); box-shadow: 0 0 0 4px rgba(255,198,26,.25); }
+  .note input {
+    width: 62px; padding: 8px 6px; border: 0; background: transparent; color: var(--text);
+    font: inherit; font-size: 1rem; font-weight: 600; text-align: center; outline: none;
+  }
+  .note button { border: 0; background: transparent; color: var(--muted); cursor: pointer; padding: 0 9px; font-size: 1.05rem; }
+  .note button:hover { color: var(--bad); }
+  .add {
+    border: 1.5px dashed var(--blue-500); background: transparent; color: var(--blue-500);
+    border-radius: 12px; padding: 8px 12px; cursor: pointer; font: inherit; font-size: .85rem; font-weight: 600;
+    transition: background .15s;
+  }
+  .add:hover { background: var(--blue-100); }
+  .avg { font-size: .8rem; color: var(--muted); margin-top: 6px; }
+  .total {
+    margin-top: 18px; padding: 12px 16px; border-radius: 14px;
+    background: linear-gradient(135deg, var(--blue-900), var(--blue-700));
+    color: #fff; display: flex; justify-content: space-between; align-items: center; font-weight: 600;
+  }
+  .total input.num {
+    width: 96px; font: inherit; font-size: 1.5rem; font-weight: 800; color: var(--yellow); text-align: right;
+    background: transparent; border: 1.5px solid transparent; border-radius: 10px; padding: 2px 8px;
+  }
+  .total input.num::placeholder { color: rgba(255,255,255,.5); }
+  .total input.num:hover, .total input.num:focus { border-color: var(--yellow); outline: none; background: rgba(255,255,255,.08); }
+  .total input.num.manual { color: #fff; text-decoration: underline wavy var(--yellow) 1px; text-underline-offset: 5px; }
+  .hint { font-size: .8rem; color: var(--muted); margin-top: 8px; min-height: 1.1em; }
+  .total input.num.opt { color: var(--yellow); text-decoration: none; }
+  .hint.opt {
+    background: var(--blue-100); color: var(--text); border-left: 4px solid var(--blue-500);
+    font-weight: 600; font-size: .88rem; padding: 10px 12px; border-radius: 10px;
+  }
+  .hint.need {
+    background: var(--yellow-soft); color: var(--yellow-ink); border-left: 4px solid var(--yellow);
+    font-weight: 600; font-size: .88rem; padding: 10px 12px; border-radius: 10px;
+  }
+  .hint button { border: 0; background: none; color: var(--blue-500); cursor: pointer; padding: 0; font: inherit; font-size: .8rem; text-decoration: underline; }
+  .optativo { margin-top: 20px; }
+  .desc { margin: 8px 0 0; color: var(--muted); font-size: .88rem; }
+  .desc b { color: var(--text); font-weight: 600; }
+  .opt-row { display: flex; flex-wrap: wrap; gap: 18px; margin-top: 14px; align-items: flex-end; }
+  .field { display: flex; flex-direction: column; gap: 6px; font-size: .88rem; font-weight: 600; }
+  .field .note { align-self: flex-start; }
+  select {
+    font: inherit; font-size: .95rem; font-weight: 600; color: var(--text); background: var(--input-bg);
+    border: 1.5px solid var(--border); border-radius: 12px; padding: 8px 12px; min-width: 180px; cursor: pointer;
+  }
+  select:focus { outline: none; border-color: var(--yellow); box-shadow: 0 0 0 4px rgba(255,198,26,.25); }
+  .opt-clear {
+    border: 1.5px solid var(--bad); background: transparent; color: var(--bad);
+    border-radius: 12px; padding: 8px 14px; cursor: pointer; font: inherit; font-size: .88rem; font-weight: 600;
+    transition: background .15s, color .15s;
+  }
+  .opt-clear:hover { background: var(--bad); color: #fff; }
+  .opt-clear[hidden] { display: none; }
+  .result {
+    margin-top: 20px; color: #fff; border: 0;
+    background: radial-gradient(600px 200px at 100% 0%, rgba(255,198,26,.3), transparent 60%),
+                linear-gradient(135deg, var(--blue-900), var(--blue-700));
+  }
+  .result::before { display: none; }
+  .result-row { display: flex; flex-wrap: wrap; gap: 16px; align-items: center; justify-content: space-between; }
+  .label { color: rgba(255,255,255,.75); font-size: .85rem; font-weight: 500; text-transform: uppercase; letter-spacing: .08em; }
+  .big { font-size: clamp(2.6rem, 8vw, 3.6rem); font-weight: 800; color: var(--yellow); line-height: 1.1; }
+  .badge { padding: 8px 16px; border-radius: 999px; font-weight: 700; font-size: .95rem; }
+  .badge.ok { background: var(--ok-soft); color: var(--ok); }
+  .badge.bad { background: var(--bad-soft); color: var(--bad); }
+  .badge.warn { background: var(--yellow); color: var(--blue-900); }
+  .breakdown { color: rgba(255,255,255,.75); font-size: .88rem; margin-top: 8px; }
+  .needed {
+    margin-top: 14px; padding: 12px 14px; border-radius: 12px; background: var(--yellow);
+    color: var(--blue-900); font-weight: 600; font-size: .95rem;
+  }
+  .settings {
+    display: flex; flex-wrap: wrap; gap: 14px; align-items: center; margin-top: 18px;
+    padding-top: 16px; border-top: 1px solid rgba(255,255,255,.18); font-size: .88rem; color: rgba(255,255,255,.85);
+  }
+  .settings .fixed {
+    display: inline-block; margin-left: 6px; padding: 6px 14px; border-radius: 10px;
+    background: rgba(255,255,255,.12); color: var(--yellow); font-weight: 700;
+  }
+  .settings input {
+    width: 66px; margin-left: 6px; padding: 6px 8px; border: 1.5px solid rgba(255,255,255,.3); border-radius: 10px;
+    background: rgba(255,255,255,.1); color: #fff; font: inherit; font-weight: 600; text-align: center;
+  }
+  .settings input:focus { outline: none; border-color: var(--yellow); }
+  .reset {
+    margin-left: auto; border: 1.5px solid rgba(255,255,255,.35); background: transparent; color: #fff;
+    border-radius: 10px; padding: 7px 14px; cursor: pointer; font: inherit; font-size: .85rem; font-weight: 600;
+  }
+  .reset:hover { background: var(--bad); border-color: var(--bad); }
+  .reset.link { margin-left: auto; }
+  .reset.link + .reset { margin-left: 0; }
+  .reset.link:hover { background: var(--yellow); border-color: var(--yellow); color: var(--blue-900); }
+  .sync { margin-top: 10px; font-size: .8rem; color: rgba(255,255,255,.7); min-height: 1em; }
+  input.invalid { color: var(--bad) !important; }
+</style>
+</head>
+<body>
+<div class="hero">
+  <div class="hero-inner">
+    <div class="brand">
+      <img src="logo.png" alt="Escuela Militar de Ingeniería" class="logo">
+      <span class="tag">CALCULADORA DE NOTAS</span>
+    </div>
+    <h1>Calcula tu nota <span>y cuánto te falta</span></h1>
+    <p>Pon tus notas de práctica, controles y examen. Si pones varias prácticas o controles, se promedian.</p>
+    <div class="chips">
+      <span>1er Parcial <b>30%</b></span><span>2do Parcial <b>30%</b></span><span>Parcial Final <b>40%</b></span>
+      <span>Práctica + Controles <b>40%</b></span><span>Examen <b>60%</b></span>
+    </div>
+  </div>
+</div>
+<main>
+
+  <div class="grid" id="parciales"></div>
+
+  <div class="card optativo">
+    <h2>Examen optativo <small>80% · 20%</small></h2>
+    <p class="desc">Cambia la nota del 1er o 2do Parcial: <b>nueva nota = Optativo × 80% + nota del parcial × 20%</b>.</p>
+    <div class="opt-row">
+      <label class="field">Parcial a cambiar
+        <select id="opt-parcial">
+          <option value="">Ninguno</option>
+          <option value="p1">1er Parcial</option>
+          <option value="p2">2do Parcial</option>
+        </select>
+      </label>
+      <label class="field">Nota del optativo
+        <span class="note"><input type="text" inputmode="decimal" autocomplete="off" id="opt-nota" placeholder="—"></span>
+      </label>
+      <button class="opt-clear" id="opt-clear" type="button" hidden>✕ Borrar optativo</button>
+    </div>
+    <div class="hint" id="opt-hint"></div>
+  </div>
+
+  <div class="card result">
+    <div class="result-row">
+      <div>
+        <div class="label">Nota final</div>
+        <div class="big" id="final">—</div>
+      </div>
+      <span class="badge" id="estado"></span>
+    </div>
+    <div class="breakdown" id="breakdown"></div>
+    <div class="needed" id="needed" hidden></div>
+    <div class="settings">
+      <span>Nota máxima <b class="fixed">10</b></span>
+      <span>Nota para aprobar <b class="fixed">5,1</b></span>
+      <button class="reset link" id="copiar" type="button">🔗 Copiar mi enlace</button>
+      <button class="reset" id="reset">Borrar todo</button>
+    </div>
+    <div class="sync" id="sync"></div>
+  </div>
+</main>
+
+<script>
+const PARCIALES = [
+  { id: "p1", nombre: "1er Parcial", peso: 0.30 },
+  { id: "p2", nombre: "2do Parcial", peso: 0.30 },
+  { id: "p3", nombre: "Parcial Final", peso: 0.40 },
+];
+const SECCIONES = [
+  { id: "practica", nombre: "Práctica", peso: 0.16, etiqueta: "40% del 40% → 16%", multi: true },
+  { id: "controles", nombre: "Controles", peso: 0.24, etiqueta: "60% del 40% → 24%", multi: true },
+  { id: "examen", nombre: "Examen del parcial", peso: 0.60, etiqueta: "60%", multi: false },
+];
+const KEY = "emi-notas-v1";
+
+// Cada usuario tiene un id propio; el enlace con ?id= abre sus notas en cualquier dispositivo
+const ONLINE = location.protocol.startsWith("http");
+const ID = (() => {
+  const fromUrl = new URLSearchParams(location.search).get("id");
+  if (fromUrl && /^[a-zA-Z0-9-]{8,64}$/.test(fromUrl)) return fromUrl;
+  let id = null;
+  try { id = localStorage.getItem("emi-id"); } catch (e) {}
+  if (!id) {
+    id = (crypto.randomUUID ? crypto.randomUUID() : Date.now().toString(36) + Math.random().toString(36).slice(2));
+    try { localStorage.setItem("emi-id", id); } catch (e) {}
+  }
+  return id;
+})();
+if (ONLINE) {
+  const u = new URL(location.href); u.searchParams.set("id", ID);
+  history.replaceState(null, "", u);
+}
+const CACHE = KEY + ":" + ID;
+
+let state = load();
+
+function emptyState() {
+  const s = { max: 10, min: 5.1 };
+  PARCIALES.forEach(p => { s[p.id] = {};
+    SECCIONES.forEach(sec => { s[p.id][sec.id] = [""]; }); });
+  s.optativo = { parcial: "", nota: "" };
+  return s;
+}
+function load() {
+  let raw = null;
+  try { raw = localStorage.getItem(CACHE) ?? localStorage.getItem(KEY); } catch (e) {}
+  try { return normalize(JSON.parse(raw)) ?? emptyState(); } catch (e) { return emptyState(); }
+}
+function normalize(s) {
+  {
+    if (s && s.p1 && s.p2 && s.p3) {
+      s.max = 10; s.min = 5.1;
+      PARCIALES.forEach(p => SECCIONES.forEach(sec => {
+        if (!Array.isArray(s[p.id][sec.id]) || !s[p.id][sec.id].length) s[p.id][sec.id] = [""];
+      }));
+      if (!s.optativo) s.optativo = { parcial: "", nota: "" };
+      return s;
+    }
+  }
+  return null;
+}
+let syncTimer = null;
+function setSync(txt) { const el = document.getElementById("sync"); if (el) el.textContent = txt; }
+function save() {
+  try { localStorage.setItem(CACHE, JSON.stringify(state)); } catch (e) {}
+  if (!ONLINE) return;
+  setSync("Guardando…");
+  clearTimeout(syncTimer);
+  syncTimer = setTimeout(async () => {
+    try {
+      const r = await fetch(`/api/notas?id=${encodeURIComponent(ID)}`, {
+        method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ data: state }),
+      });
+      setSync(r.ok ? "✓ Guardado en la nube" : "No se pudo guardar en la nube");
+    } catch (e) { setSync("Sin conexión: guardado solo en este dispositivo"); }
+  }, 700);
+}
+async function loadRemote() {
+  if (!ONLINE) { setSync("Guardado en este dispositivo"); return; }
+  try {
+    const r = await fetch(`/api/notas?id=${encodeURIComponent(ID)}`);
+    const j = await r.json();
+    const s = normalize(j.data);
+    if (s) {
+      state = s;
+      try { localStorage.setItem(CACHE, JSON.stringify(state)); } catch (e) {}
+      render();
+    }
+    setSync("✓ Sincronizado");
+  } catch (e) { setSync("Sin conexión: guardado solo en este dispositivo"); }
+}
+
+const fmt = n => (Math.round(n * 100) / 100).toLocaleString("es-BO", { maximumFractionDigits: 2 });
+
+function valid(v) {
+  if (v === "" || v === null) return null;
+  const n = Number(String(v).trim().replace(",", "."));
+  return Number.isFinite(n) && n >= 0 && n <= state.max ? n : null;
+}
+function avg(list) {
+  const nums = list.map(valid).filter(n => n !== null);
+  return nums.length ? nums.reduce((a, b) => a + b, 0) / nums.length : null;
+}
+function parcialDado(pid) {
+  return valid(state[pid].manual ?? "") !== null || avg(state[pid].examen) !== null;
+}
+// Nota del parcial ya con el optativo aplicado (si corresponde)
+function notaEfectiva(pid) {
+  const base = notaParcial(pid);
+  const o = valid(state.optativo.nota);
+  if (state.optativo.parcial === pid && parcialDado(pid) && base !== null && o !== null) return 0.2 * base + 0.8 * o;
+  return base;
+}
+const str = n => String(Math.round(n * 100) / 100).replace(".", ",");
+// Nota escrita a mano (si hay), si no la calculada
+function notaParcial(pid) {
+  const m = valid(state[pid].manual ?? "");
+  return m !== null ? m : notaCalculada(pid);
+}
+// Nota calculada: null si no hay ninguna nota; secciones vacías cuentan como 0
+function notaCalculada(pid) {
+  const avgs = SECCIONES.map(s => avg(state[pid][s.id]));
+  if (avgs.every(a => a === null)) return null;
+  return SECCIONES.reduce((acc, s, i) => acc + (avgs[i] ?? 0) * s.peso, 0);
+}
+
+function render() {
+  const cont = document.getElementById("parciales");
+  cont.innerHTML = "";
+  PARCIALES.forEach(p => {
+    const card = document.createElement("div");
+    card.className = "card";
+    card.innerHTML = `<h2>${p.nombre} <small>${p.peso * 100}%</small></h2>`;
+    SECCIONES.forEach(s => {
+      const sec = document.createElement("div");
+      sec.className = "section";
+      sec.innerHTML = `<div class="section-head"><span>${s.nombre}</span></div>`;
+      const notes = document.createElement("div");
+      notes.className = "notes";
+      state[p.id][s.id].forEach((val, i) => {
+        const wrap = document.createElement("div");
+        wrap.className = "note";
+        const inp = document.createElement("input");
+        inp.type = "text"; inp.inputMode = "decimal"; inp.autocomplete = "off";
+        inp.placeholder = "—"; inp.value = val;
+        inp.setAttribute("aria-label", `${p.nombre} ${s.nombre} nota ${i + 1}`);
+        inp.addEventListener("input", () => {
+          state[p.id][s.id][i] = inp.value;
+          inp.classList.toggle("invalid", inp.value !== "" && valid(inp.value) === null);
+          save(); update();
+        });
+        inp.classList.toggle("invalid", val !== "" && valid(val) === null);
+        wrap.appendChild(inp);
+        if (s.multi && state[p.id][s.id].length > 1) {
+          const del = document.createElement("button");
+          del.textContent = "×"; del.title = "Quitar nota";
+          del.addEventListener("click", () => { state[p.id][s.id].splice(i, 1); save(); render(); });
+          wrap.appendChild(del);
+        }
+        notes.appendChild(wrap);
+      });
+      const add = document.createElement("button");
+      add.className = "add"; add.textContent = "+ nota";
+      add.addEventListener("click", () => {
+        state[p.id][s.id].push(""); save(); render();
+        const inputs = notes.parentElement.querySelectorAll("input");
+        inputs[inputs.length - 1]?.focus();
+      });
+      if (s.multi) notes.appendChild(add);
+      sec.appendChild(notes);
+      const a = document.createElement("div");
+      a.className = "avg"; a.id = `avg-${p.id}-${s.id}`;
+      sec.appendChild(a);
+      card.appendChild(sec);
+    });
+    const tot = document.createElement("div");
+    tot.className = "total";
+    tot.innerHTML = `<span>Nota del parcial</span>`;
+    const ti = document.createElement("input");
+    ti.type = "text"; ti.inputMode = "decimal"; ti.autocomplete = "off";
+    ti.className = "num"; ti.id = `tot-${p.id}`; ti.placeholder = "—";
+    ti.title = "Puedes escribir la nota del parcial directamente";
+    ti.setAttribute("aria-label", `Nota del ${p.nombre}`);
+    ti.addEventListener("input", () => { state[p.id].manual = ti.value; save(); update(); });
+    ti.addEventListener("blur", update);
+    ti.addEventListener("focus", () => {
+      if (notaEfectiva(p.id) !== notaParcial(p.id)) {
+        const c = notaCalculada(p.id);
+        ti.value = (state[p.id].manual ?? "") !== "" ? state[p.id].manual : (c === null ? "" : str(c));
+      }
+    });
+    tot.appendChild(ti);
+    card.appendChild(tot);
+    const hint = document.createElement("div");
+    hint.className = "hint"; hint.id = `hint-${p.id}`;
+    card.appendChild(hint);
+    cont.appendChild(card);
+  });
+  document.getElementById("opt-parcial").value = state.optativo.parcial;
+  document.getElementById("opt-nota").value = state.optativo.nota;
+  update();
+}
+
+function update() {
+  let final = 0, breakdown = [];
+  const completos = [], pendientes = [];
+  const opt = { base: null, nueva: null };
+  PARCIALES.forEach(p => {
+    SECCIONES.forEach(s => {
+      const a = avg(state[p.id][s.id]);
+      document.getElementById(`avg-${p.id}-${s.id}`).textContent =
+        a === null ? "Sin notas" : `Promedio: ${fmt(a)} → aporta ${fmt(a * s.peso)}`;
+    });
+    const ti = document.getElementById(`tot-${p.id}`);
+    const calc = notaCalculada(p.id);
+    const esManual = (state[p.id].manual ?? "") !== "";
+    ti.classList.toggle("manual", esManual);
+    ti.classList.toggle("invalid", esManual && valid(state[p.id].manual) === null);
+    const conOpt = notaEfectiva(p.id) !== notaParcial(p.id);
+    ti.classList.toggle("opt", conOpt);
+    if (document.activeElement !== ti) {
+      const ef = notaEfectiva(p.id);
+      ti.value = conOpt ? str(ef) : esManual ? state[p.id].manual : (calc === null ? "" : str(calc));
+    }
+    // Un parcial cuenta como "dado" si tiene nota escrita a mano o nota de examen
+    const completo = parcialDado(p.id);
+    if (completo) {
+      let n = notaParcial(p.id), extra = "";
+      if (state.optativo.parcial === p.id) {
+        opt.base = n;
+        const o = valid(state.optativo.nota);
+        if (o !== null) { n = 0.2 * n + 0.8 * o; opt.nueva = n; extra = " (con optativo)"; }
+      }
+      completos.push(p);
+      final += n * p.peso;
+      breakdown.push(`${p.nombre}${extra}: ${fmt(n)} × ${p.peso * 100}% = ${fmt(n * p.peso)}`);
+    } else {
+      pendientes.push(p);
+    }
+  });
+
+  // Nota necesaria (igual en cada parcial pendiente) para llegar al mínimo
+  const pesoPend = pendientes.reduce((a, p) => a + p.peso, 0);
+  const req = pendientes.length ? (state.min - final) / pesoPend : null;
+
+  PARCIALES.forEach(p => {
+    const hint = document.getElementById(`hint-${p.id}`);
+    const calc = notaCalculada(p.id);
+    const esManual = (state[p.id].manual ?? "") !== "";
+    hint.innerHTML = "";
+    hint.className = "hint";
+    if (notaEfectiva(p.id) !== notaParcial(p.id)) {
+      hint.className = "hint opt";
+      hint.textContent = `Cambiada con el optativo: ${fmt(notaParcial(p.id))} → ${fmt(notaEfectiva(p.id))}`;
+      return;
+    }
+    if (esManual) {
+      hint.append(`Nota escrita a mano (calculada: ${calc === null ? "—" : fmt(calc)}) · `);
+      const b = document.createElement("button");
+      b.textContent = "usar la calculada";
+      b.addEventListener("click", () => { state[p.id].manual = ""; save(); update(); });
+      hint.appendChild(b);
+    }
+    if (!pendientes.includes(p) || completos.length === 0) return;
+    hint.className = "hint need";
+    if (req <= 0) { hint.textContent = "Ya aprobaste aunque saques 0 en este parcial."; return; }
+    if (req > state.max) { hint.textContent = `Necesitarías ${fmt(req)}: ya no alcanza.`; return; }
+    let txt = `Para aprobar necesitas ${fmt(req)} en este parcial`;
+    const prac = avg(state[p.id].practica), ctrl = avg(state[p.id].controles);
+    if (prac !== null || ctrl !== null) {
+      const aporte = (prac ?? 0) * 0.16 + (ctrl ?? 0) * 0.24;
+      const ex = (req - aporte) / 0.6;
+      txt += ex <= 0 ? " (ya lo cubres con práctica y controles)."
+        : ex > state.max ? ` → en el examen necesitarías ${fmt(ex)}, no alcanza.`
+        : ` → en el examen necesitas al menos ${fmt(ex)}.`;
+    } else {
+      txt += ".";
+    }
+    hint.textContent = txt;
+  });
+
+  const finalEl = document.getElementById("final");
+  const estado = document.getElementById("estado");
+  const needed = document.getElementById("needed");
+
+  finalEl.textContent = completos.length ? fmt(final) : "—";
+  updateOptativo(opt, final, pendientes);
+  document.getElementById("breakdown").textContent = breakdown.join("  ·  ");
+  needed.hidden = true;
+
+  if (!completos.length) {
+    estado.className = "badge"; estado.textContent = "";
+  } else if (!pendientes.length) {
+    const ok = final >= state.min;
+    estado.className = "badge " + (ok ? "ok" : "bad");
+    estado.textContent = ok ? "Aprobado" : "Reprobado";
+  } else {
+    const nombres = pendientes.map(p => p.nombre).join(" y ");
+    needed.hidden = false;
+    if (req <= 0) {
+      estado.className = "badge ok"; estado.textContent = "Ya aprobaste";
+      needed.textContent = `Con lo que llevas ya alcanzas ${fmt(state.min)}, aunque saques 0 en ${nombres}.`;
+    } else if (req > state.max) {
+      estado.className = "badge bad"; estado.textContent = "No alcanza";
+      needed.textContent = `Necesitarías ${fmt(req)} en ${nombres}, más que la nota máxima (${fmt(state.max)}).`;
+    } else {
+      estado.className = "badge warn"; estado.textContent = "En curso";
+      needed.textContent = `Llevas ${fmt(final)} acumulado. Para aprobar con ${fmt(state.min)} necesitas sacar al menos ${fmt(req)} en ${nombres}.`;
+    }
+  }
+}
+
+function updateOptativo(opt, final, pendientes) {
+  const hint = document.getElementById("opt-hint");
+  const inp = document.getElementById("opt-nota");
+  const pid = state.optativo.parcial;
+  const nota = state.optativo.nota;
+  inp.classList.toggle("invalid", nota !== "" && valid(nota) === null);
+  document.getElementById("opt-clear").hidden = !pid && nota === "";
+  hint.className = "hint";
+  if (!pid) { hint.textContent = "Elige qué parcial quieres cambiar con el optativo."; return; }
+  const P = PARCIALES.find(p => p.id === pid);
+  if (opt.base === null) { hint.textContent = `Primero completa la nota del ${P.nombre}.`; return; }
+  hint.className = "hint need";
+  if (opt.nueva !== null) {
+    const dif = opt.nueva - opt.base;
+    hint.textContent = `${P.nombre}: ${fmt(opt.base)} → ${fmt(opt.nueva)} ` +
+      (dif >= 0 ? `(sube ${fmt(dif)}).` : `(¡ojo, baja ${fmt(-dif)}!).`);
+    return;
+  }
+  // Sin nota de optativo: cuánto necesita para aprobar (si los demás parciales ya están)
+  if (pendientes.length) {
+    hint.className = "hint";
+    hint.textContent = "Completa los demás parciales para saber cuánto necesitas en el optativo.";
+    return;
+  }
+  const resto = final - opt.base * P.peso;
+  const necesitaParcial = (state.min - resto) / P.peso;
+  const o = (necesitaParcial - 0.2 * opt.base) / 0.8;
+  if (final >= state.min) hint.textContent = `Ya aprobaste sin optativo. Para no bajar tu nota necesitas al menos ${fmt(opt.base)}.`;
+  else if (o > state.max) hint.textContent = `Ni con ${fmt(state.max)} en el optativo alcanzas ${fmt(state.min)} (necesitarías ${fmt(o)}).`;
+  else hint.textContent = `Para aprobar necesitas al menos ${fmt(Math.max(o, 0))} en el optativo.`;
+}
+
+document.getElementById("opt-parcial").addEventListener("change", e => {
+  state.optativo.parcial = e.target.value; save(); update();
+});
+document.getElementById("opt-clear").addEventListener("click", () => {
+  state.optativo = { parcial: "", nota: "" };
+  document.getElementById("opt-parcial").value = "";
+  document.getElementById("opt-nota").value = "";
+  save(); update();
+});
+document.getElementById("opt-nota").addEventListener("input", e => {
+  state.optativo.nota = e.target.value; save(); update();
+});
+
+document.getElementById("reset").addEventListener("click", () => {
+  const { max, min } = state; state = emptyState(); state.max = max; state.min = min; save(); render();
+});
+
+document.getElementById("copiar").addEventListener("click", async e => {
+  const b = e.currentTarget;
+  try { await navigator.clipboard.writeText(location.href); b.textContent = "✓ Enlace copiado"; }
+  catch (err) { prompt("Copia tu enlace:", location.href); }
+  setTimeout(() => { b.textContent = "🔗 Copiar mi enlace"; }, 2000);
+});
+
+render();
+loadRemote();
+</script>
+</body>
+</html>
