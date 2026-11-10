@@ -3,6 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#0a2a66">
 <title>Calculadora de Notas EMI</title>
 <link rel="icon" href="logo.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -38,7 +39,7 @@
   .hero-inner { max-width: 1040px; margin: 0 auto; }
   .brand { display: flex; flex-wrap: wrap; align-items: center; gap: 14px; }
   .logo {
-    height: 88px; width: auto; background: #fff; padding: 6px 10px; border-radius: 14px;
+    height: 72px; width: auto; background: #fff; padding: 6px 10px; border-radius: 14px;
     box-shadow: 0 6px 18px -6px rgba(0,0,0,.35);
   }
   .tag {
@@ -62,8 +63,11 @@
   .visitas[hidden] { display: none; }
   .visitas b { font-weight: 800; font-variant-numeric: tabular-nums; }
   .v-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--blue-700); box-shadow: 0 0 0 3px rgba(18,67,168,.25); }
-  main { max-width: 1040px; margin: -60px auto 0; padding: 0 16px 48px; }
-  .grid { display: grid; gap: 18px; grid-template-columns: repeat(auto-fit, minmax(290px, 1fr)); }
+  main { max-width: 1072px; margin: -60px auto 0; padding: 0 16px 96px; }
+  .grid { display: grid; gap: 18px; grid-template-columns: repeat(3, minmax(0, 1fr)); align-items: stretch; }
+  .grid > .card { display: flex; flex-direction: column; }
+  .grid > .card .total { margin-top: auto; }
+  .grid > .card .total-gap { height: 18px; flex: none; }
   .card {
     background: var(--card); border: 1px solid var(--border); border-radius: 20px;
     padding: 20px; box-shadow: var(--shadow); position: relative; overflow: hidden;
@@ -79,14 +83,14 @@
   }
   .section { margin-top: 16px; }
   .section-head { display: flex; justify-content: space-between; gap: 8px; font-size: .9rem; font-weight: 600; margin-bottom: 8px; }
-  .section-head { align-items: center; }
+  .section-head { align-items: baseline; flex-wrap: wrap; }
   .sub-total {
     margin-top: 14px; padding: 10px 14px; border-radius: 12px;
     display: flex; justify-content: space-between; align-items: center; gap: 8px;
     border: 1.5px dashed var(--yellow); font-weight: 600; font-size: .9rem;
   }
   .sub-total[hidden], .sec-val[hidden] { display: none; }
-  .sub-total small { color: var(--muted); font-weight: 500; }
+  .sub-total small { color: var(--muted); font-weight: 500; white-space: nowrap; }
   .sub-num {
     background: var(--yellow); color: var(--blue-900); font-weight: 800; font-size: 1.05rem;
     padding: 3px 14px; border-radius: 999px; font-variant-numeric: tabular-nums;
@@ -113,9 +117,9 @@
     transition: background .15s;
   }
   .add:hover { background: var(--blue-100); }
-  .avg { font-size: .8rem; color: var(--muted); margin-top: 6px; }
+  .avg { font-size: .78rem; font-weight: 500; color: var(--muted); font-variant-numeric: tabular-nums; }
   .total {
-    margin-top: 18px; padding: 12px 16px; border-radius: 14px;
+    padding: 12px 16px; border-radius: 14px;
     background: linear-gradient(135deg, var(--blue-900), var(--blue-700));
     color: #fff; display: flex; justify-content: space-between; align-items: center; font-weight: 600;
   }
@@ -126,12 +130,9 @@
   .total input.num::placeholder { color: rgba(255,255,255,.5); }
   .total input.num:hover, .total input.num:focus { border-color: var(--yellow); outline: none; background: rgba(255,255,255,.08); }
   .total input.num.manual { color: #fff; text-decoration: underline wavy var(--yellow) 1px; text-underline-offset: 5px; }
-  .edit-tip {
-    margin-top: 8px; padding: 8px 12px; border-radius: 10px;
-    background: var(--yellow-soft); color: var(--yellow-ink); border-left: 4px solid var(--yellow);
-    font-size: .9rem; font-weight: 600;
-  }
-  .hint { font-size: .8rem; color: var(--muted); margin-top: 8px; min-height: 1.1em; }
+  .edit-tip { margin-top: 8px; font-size: .78rem; font-weight: 500; color: var(--muted); }
+  .hint { font-size: .8rem; color: var(--muted); margin-top: 8px; }
+  .hint:empty { display: none; }
   .total input.num.opt { color: var(--yellow); text-decoration: none; }
   .hint.opt {
     background: var(--blue-100); color: var(--text); border-left: 4px solid var(--blue-500);
@@ -142,8 +143,9 @@
     font-weight: 600; font-size: .88rem; padding: 10px 12px; border-radius: 10px;
   }
   .hint button { border: 0; background: none; color: var(--blue-500); cursor: pointer; padding: 0; font: inherit; font-size: .8rem; text-decoration: underline; }
-  .optativo { margin-top: 20px; }
-  .need-card { margin-top: 20px; }
+  .bottom { display: grid; gap: 18px; margin-top: 18px; grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr); align-items: start; }
+  .bottom-left { display: grid; gap: 18px; min-width: 0; }
+  .bottom .result { position: sticky; top: 16px; }
   .need-card[hidden] { display: none; }
   .need-list { display: grid; gap: 12px; margin-top: 14px; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); }
   .need-row {
@@ -174,7 +176,7 @@
   .opt-clear:hover { background: var(--bad); color: #fff; }
   .opt-clear[hidden] { display: none; }
   .result {
-    margin-top: 20px; color: #fff; border: 0;
+    color: #fff; border: 0;
     background: radial-gradient(600px 200px at 100% 0%, rgba(255,198,26,.3), transparent 60%),
                 linear-gradient(135deg, var(--blue-900), var(--blue-700));
   }
@@ -214,6 +216,95 @@
   .reset.link:hover { background: var(--yellow); border-color: var(--yellow); color: var(--blue-900); }
   .sync { margin-top: 10px; font-size: .8rem; color: rgba(255,255,255,.7); min-height: 1em; }
   input.invalid { color: var(--bad) !important; }
+  button { -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
+  button:focus-visible, select:focus-visible { outline: 3px solid var(--yellow); outline-offset: 2px; }
+  .add:active, .reset:active, .opt-clear:active { transform: scale(.97); }
+
+  /* Barra flotante con la nota final (aparece cuando el resultado no está a la vista) */
+  .dock {
+    position: fixed; left: 50%; bottom: calc(12px + env(safe-area-inset-bottom)); z-index: 10;
+    transform: translate(-50%, 0); width: min(520px, calc(100% - 24px));
+    display: flex; align-items: center; gap: 12px; padding: 8px 10px 8px 16px;
+    border: 1px solid rgba(255,255,255,.18); border-radius: 999px; cursor: pointer; font: inherit; color: #fff; text-align: left;
+    background: linear-gradient(135deg, var(--blue-900), var(--blue-700));
+    box-shadow: 0 12px 30px -8px rgba(5, 20, 60, .6);
+    transition: transform .25s ease, opacity .25s ease;
+  }
+  .dock.off { transform: translate(-50%, 140%); opacity: 0; pointer-events: none; }
+  .dock-label { font-size: .7rem; font-weight: 500; text-transform: uppercase; letter-spacing: .08em; color: rgba(255,255,255,.75); }
+  .dock-num { font-size: 1.35rem; font-weight: 800; color: var(--yellow); line-height: 1; font-variant-numeric: tabular-nums; }
+  .dock .badge { margin-left: auto; padding: 5px 12px; font-size: .8rem; white-space: nowrap; }
+  .dock .badge:empty { display: none; }
+  @media (prefers-reduced-motion: reduce) { .dock { transition: none; } }
+
+  /* Tablet */
+  @media (max-width: 899px) {
+    .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .grid > .card:last-child { grid-column: 1 / -1; }
+    .bottom { grid-template-columns: minmax(0, 1fr); }
+    .bottom .result { position: static; }
+  }
+
+  /* Celular: todo más compacto */
+  @media (max-width: 600px) {
+    .hero { padding: 16px 14px 62px; }
+    .brand { gap: 10px; }
+    .logo { height: 46px; padding: 4px 7px; border-radius: 10px; }
+    .tag { font-size: .62rem; padding: 3px 8px; }
+    .hero h1 { margin: 10px 0 4px; font-size: 1.3rem; line-height: 1.2; }
+    .hero p { font-size: .8rem; }
+    .chips { gap: 5px; margin-top: 10px; }
+    .chips span { padding: 2px 8px; font-size: .68rem; }
+    .visitas { margin-top: 10px; padding: 4px 11px; font-size: .74rem; gap: 7px; }
+    .v-dot { width: 6px; height: 6px; box-shadow: 0 0 0 2px rgba(18,67,168,.25); }
+    main { margin-top: -48px; padding: 0 10px 88px; }
+    .grid, .bottom, .bottom-left { gap: 12px; }
+    .grid { grid-template-columns: minmax(0, 1fr); }
+    .bottom { margin-top: 12px; }
+    .card { padding: 14px; border-radius: 16px; }
+    .card::before { height: 3px; }
+    .card h2 { font-size: 1rem; }
+    .card h2 small { font-size: .7rem; padding: 2px 8px; }
+    .section { margin-top: 10px; }
+    .section-head { font-size: .82rem; margin-bottom: 5px; }
+    .avg { font-size: .72rem; }
+    .notes { gap: 6px; }
+    .note { border-radius: 10px; }
+    .note input { width: 50px; padding: 5px 4px; }
+    .note button { padding: 0 8px 0 2px; }
+    .add { padding: 5px 10px; font-size: .78rem; border-radius: 10px; }
+    .sub-total { margin-top: 10px; padding: 6px 10px; font-size: .78rem; border-radius: 10px; }
+    .sub-num { font-size: .9rem; padding: 1px 10px; }
+    .grid > .card .total-gap { height: 12px; }
+    .total { padding: 7px 12px; border-radius: 12px; font-size: .88rem; }
+    .total input.num { font-size: 1.25rem; width: 84px; padding: 0 6px; }
+    .edit-tip { font-size: .72rem; margin-top: 6px; }
+    .hint { font-size: .74rem; margin-top: 6px; }
+    .hint.opt, .hint.need { font-size: .78rem; padding: 7px 10px; }
+    .need-list { gap: 8px; margin-top: 10px; grid-template-columns: minmax(0, 1fr); }
+    .need-row { padding: 8px 10px; border-radius: 10px; }
+    .need-name { font-size: .88rem; }
+    .need-val { font-size: .92rem; padding: 1px 10px; }
+    .need-row p { font-size: .78rem; margin-top: 3px; }
+    .desc { font-size: .78rem; margin-top: 6px; }
+    .opt-row { gap: 10px; margin-top: 10px; }
+    .field { font-size: .78rem; gap: 4px; }
+    .field:first-child { flex: 1 1 140px; }
+    select { min-width: 0; width: 100%; padding: 6px 10px; border-radius: 10px; }
+    .opt-clear { padding: 6px 12px; font-size: .78rem; border-radius: 10px; }
+    .label { font-size: .7rem; }
+    .big { font-size: 2.2rem; }
+    .badge { padding: 5px 12px; font-size: .8rem; }
+    .breakdown { font-size: .76rem; margin-top: 6px; }
+    .needed { margin-top: 10px; padding: 9px 11px; font-size: .82rem; border-radius: 10px; }
+    .settings { gap: 8px 12px; margin-top: 12px; padding-top: 12px; font-size: .76rem; }
+    .settings .fixed { padding: 3px 9px; border-radius: 8px; }
+    .reset { padding: 7px 10px; font-size: .78rem; flex: 1 1 0; white-space: nowrap; }
+    .reset.link { margin-left: 0; }
+    .sync { font-size: .72rem; margin-top: 8px; }
+    .dock { padding: 6px 8px 6px 14px; }
+    .dock-num { font-size: 1.2rem; }
+  }
 </style>
 </head>
 <body>
@@ -239,6 +330,8 @@
 
   <div class="grid" id="parciales"></div>
 
+  <div class="bottom">
+  <div class="bottom-left">
   <div class="card need-card" id="need-card" hidden>
     <h2>Lo que necesitas para aprobar <small>5,1</small></h2>
     <div class="need-list" id="need-list"></div>
@@ -262,8 +355,9 @@
     </div>
     <div class="hint" id="opt-hint"></div>
   </div>
+  </div>
 
-  <div class="card result">
+  <div class="card result" id="resultado">
     <div class="result-row">
       <div>
         <div class="label">Nota final</div>
@@ -281,7 +375,14 @@
     </div>
     <div class="sync" id="sync"></div>
   </div>
+  </div>
 </main>
+
+<button class="dock off" id="dock" type="button" aria-label="Ver nota final">
+  <span class="dock-label">Nota final</span>
+  <span class="dock-num" id="dock-num">—</span>
+  <span class="badge" id="dock-estado"></span>
+</button>
 
 <script>
 const PARCIALES = [
@@ -417,7 +518,7 @@ function render() {
     SECCIONES.forEach(s => {
       const sec = document.createElement("div");
       sec.className = "section";
-      sec.innerHTML = `<div class="section-head"><span>${s.nombre}</span></div>`;
+      sec.innerHTML = `<div class="section-head"><span>${s.nombre}</span><span class="avg" id="avg-${p.id}-${s.id}"></span></div>`;
       const notes = document.createElement("div");
       notes.className = "notes";
       state[p.id][s.id].forEach((val, i) => {
@@ -436,14 +537,14 @@ function render() {
         wrap.appendChild(inp);
         if (s.multi && state[p.id][s.id].length > 1) {
           const del = document.createElement("button");
-          del.textContent = "×"; del.title = "Quitar nota";
+          del.type = "button"; del.textContent = "×"; del.title = "Quitar nota"; del.setAttribute("aria-label", "Quitar nota");
           del.addEventListener("click", () => { state[p.id][s.id].splice(i, 1); save(); render(); });
           wrap.appendChild(del);
         }
         notes.appendChild(wrap);
       });
       const add = document.createElement("button");
-      add.className = "add"; add.textContent = "+ nota";
+      add.type = "button"; add.className = "add"; add.textContent = "+ nota";
       add.addEventListener("click", () => {
         state[p.id][s.id].push(""); save(); render();
         const inputs = notes.parentElement.querySelectorAll("input");
@@ -451,9 +552,6 @@ function render() {
       });
       if (s.multi) notes.appendChild(add);
       sec.appendChild(notes);
-      const a = document.createElement("div");
-      a.className = "avg"; a.id = `avg-${p.id}-${s.id}`;
-      sec.appendChild(a);
       card.appendChild(sec);
       if (s.id === "controles") {
         const sub = document.createElement("div");
@@ -461,6 +559,8 @@ function render() {
         card.appendChild(sub);
       }
     });
+    const gap = document.createElement("div"); gap.className = "total-gap";
+    card.appendChild(gap);
     const tot = document.createElement("div");
     tot.className = "total";
     tot.innerHTML = `<span>Nota del parcial</span>`;
@@ -480,7 +580,7 @@ function render() {
     card.appendChild(tot);
     const tip = document.createElement("div");
     tip.className = "edit-tip";
-    tip.textContent = "✎ Puedes escribir la nota del parcial directamente";
+    tip.textContent = "✎ Toca la nota para escribirla directamente";
     card.appendChild(tip);
     const hint = document.createElement("div");
     hint.className = "hint"; hint.id = `hint-${p.id}`;
@@ -500,7 +600,7 @@ function update() {
     SECCIONES.forEach(s => {
       const a = avg(state[p.id][s.id]);
       document.getElementById(`avg-${p.id}-${s.id}`).textContent =
-        a === null ? "Sin notas" : `Promedio: ${fmt(a)} → aporta ${fmt(a * s.peso)}`;
+        a === null ? "" : s.multi ? `Promedio ${fmt(a)} · aporta ${fmt(a * s.peso)}` : `aporta ${fmt(a * s.peso)}`;
     });
     // Práctica (40%) + Controles (60%) = nota del 40% del parcial
     {
@@ -629,7 +729,25 @@ function update() {
       needed.textContent = `Llevas ${fmt(final)} acumulado. Para aprobar con ${fmt(state.min)} necesitas sacar al menos ${fmt(req)} en ${nombres}.`;
     }
   }
+  document.getElementById("dock-num").textContent = finalEl.textContent;
+  const de = document.getElementById("dock-estado");
+  de.className = estado.className; de.textContent = estado.textContent;
+  hayNota = completos.length > 0;
+  syncDock();
 }
+
+// La barra flotante se muestra solo si hay nota y la tarjeta de resultado no está en pantalla
+let hayNota = false, resultadoVisible = false;
+function syncDock() {
+  document.getElementById("dock").classList.toggle("off", !hayNota || resultadoVisible);
+}
+if ("IntersectionObserver" in window) {
+  new IntersectionObserver(es => { resultadoVisible = es[0].isIntersecting; syncDock(); }, { threshold: 0.25 })
+    .observe(document.getElementById("resultado"));
+} else { resultadoVisible = true; }
+document.getElementById("dock").addEventListener("click", () => {
+  document.getElementById("resultado").scrollIntoView({ behavior: "smooth", block: "center" });
+});
 
 function updateOptativo(opt, final, pendientes) {
   const hint = document.getElementById("opt-hint");
