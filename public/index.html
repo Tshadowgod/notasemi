@@ -244,6 +244,14 @@
     box-shadow: 0 4px 12px rgba(0,0,0,.4);
   }
   #ver-meme[hidden] { display: none; }
+  .meme-box p:empty { display: none; }
+  .meme-tag {
+    position: absolute; top: 18px; left: 18px; z-index: 1;
+    background: var(--yellow); color: var(--blue-900); font-weight: 800; font-size: .72rem;
+    letter-spacing: .06em; text-transform: uppercase; padding: 4px 10px; border-radius: 999px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.35);
+  }
+  .meme-tag[hidden] { display: none; }
   @keyframes meme-fade { from { opacity: 0; } }
   @keyframes meme-pop { from { transform: scale(.85); opacity: 0; } }
   @media (prefers-reduced-motion: reduce) { .meme, .meme-box { animation: none; } }
@@ -417,6 +425,7 @@
 <div class="meme" id="meme" hidden role="dialog" aria-modal="true" aria-labelledby="meme-txt">
   <div class="meme-box">
     <button class="meme-close" id="meme-close" type="button" aria-label="Cerrar">✕</button>
+    <span class="meme-tag" id="meme-tag" hidden>📢 Anuncio</span>
     <img id="meme-img" alt="">
     <p id="meme-txt"></p>
   </div>
@@ -842,9 +851,38 @@ function abrirMeme(c) {
   img.src = m.src; img.alt = m.alt;
   document.getElementById("meme-txt").textContent =
     `Llevas ${fmt(c.acum)} acumulado con el 1er y 2do Parcial.`;
+  document.getElementById("meme-tag").hidden = true;
   document.getElementById("meme").hidden = false;
   document.getElementById("meme-close").focus();
 }
+// Anuncio al entrar: una imagen al azar, una vez por visita
+const ANUNCIOS = [
+  { src: "anuncios/anuncio-1.webp", alt: "Cuando te enteras que tienes guardia mañana" },
+  { src: "anuncios/anuncio-2.webp", alt: "Cuando te enteraste que pasaste" },
+  { src: "anuncios/anuncio-3.webp", alt: "Cuando no hiciste guardia y el oficial te está buscando" },
+  { src: "anuncios/anuncio-4.webp", alt: "Yo el primer semestre / Yo ahora" },
+];
+function abrirAnuncio() {
+  let ultimo = -1;
+  try { ultimo = Number(localStorage.getItem("emi-anuncio-ultimo") ?? -1); } catch (e) {}
+  let i = Math.floor(Math.random() * ANUNCIOS.length);
+  if (ANUNCIOS.length > 1 && i === ultimo) i = (i + 1) % ANUNCIOS.length;
+  try { localStorage.setItem("emi-anuncio-ultimo", String(i)); } catch (e) {}
+  const img = document.getElementById("meme-img");
+  img.src = ANUNCIOS[i].src; img.alt = ANUNCIOS[i].alt;
+  document.getElementById("meme-txt").textContent = "";
+  document.getElementById("meme-tag").hidden = false;
+  document.getElementById("meme").hidden = false;
+  document.getElementById("meme-close").focus();
+}
+(() => {
+  let visto = false;
+  try { visto = sessionStorage.getItem("emi-anuncio") === "1"; } catch (e) {}
+  if (visto) return;
+  try { sessionStorage.setItem("emi-anuncio", "1"); } catch (e) {}
+  setTimeout(() => { if (document.getElementById("meme").hidden) abrirAnuncio(); }, 800);
+})();
+
 function cerrarMeme() { document.getElementById("meme").hidden = true; }
 document.getElementById("meme-close").addEventListener("click", cerrarMeme);
 document.getElementById("meme").addEventListener("click", e => { if (e.target.id === "meme") cerrarMeme(); });
