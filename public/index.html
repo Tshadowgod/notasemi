@@ -224,6 +224,30 @@
   button:focus-visible, select:focus-visible { outline: 3px solid var(--yellow); outline-offset: 2px; }
   .add:active, .reset:active, .opt-clear:active { transform: scale(.97); }
 
+  .meme {
+    position: fixed; inset: 0; z-index: 50; display: grid; place-items: center;
+    padding: max(16px, env(safe-area-inset-top)) max(16px, env(safe-area-inset-right)) max(16px, env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left));
+    background: rgba(4, 12, 32, .78); backdrop-filter: blur(4px);
+    animation: meme-fade .2s ease;
+  }
+  .meme[hidden] { display: none; }
+  .meme-box {
+    position: relative; width: min(440px, 100%); background: var(--card); border-radius: 20px; padding: 10px;
+    border: 2px solid var(--yellow); box-shadow: 0 20px 50px -10px rgba(0,0,0,.6);
+    animation: meme-pop .3s cubic-bezier(.2,.9,.3,1.3);
+  }
+  .meme-box img { display: block; width: 100%; max-height: 70vh; object-fit: contain; border-radius: 14px; background: #000; }
+  .meme-box p { margin: 10px 6px 4px; text-align: center; font-weight: 600; font-size: .9rem; color: var(--text); }
+  .meme-close {
+    position: absolute; top: -12px; right: -12px; width: 36px; height: 36px; border-radius: 50%;
+    border: 0; background: var(--yellow); color: var(--blue-900); font-weight: 800; font-size: 1rem; cursor: pointer;
+    box-shadow: 0 4px 12px rgba(0,0,0,.4);
+  }
+  #ver-meme[hidden] { display: none; }
+  @keyframes meme-fade { from { opacity: 0; } }
+  @keyframes meme-pop { from { transform: scale(.85); opacity: 0; } }
+  @media (prefers-reduced-motion: reduce) { .meme, .meme-box { animation: none; } }
+
   /* Barra flotante con la nota final (aparece cuando el resultado no está a la vista) */
   .dock {
     position: fixed; left: 50%; bottom: calc(12px + env(safe-area-inset-bottom)); z-index: 10;
@@ -381,6 +405,7 @@
     <div class="settings">
       <span>Nota máxima <b class="fixed">10</b></span>
       <span>Nota para aprobar <b class="fixed">5,1</b></span>
+      <button class="reset link" id="ver-meme" type="button" hidden>🖼 Ver imagen</button>
       <button class="reset link" id="copiar" type="button">🔗 Copiar mi enlace</button>
       <button class="reset" id="reset">Borrar todo</button>
     </div>
@@ -388,6 +413,14 @@
   </div>
   </div>
 </main>
+
+<div class="meme" id="meme" hidden role="dialog" aria-modal="true" aria-labelledby="meme-txt">
+  <div class="meme-box">
+    <button class="meme-close" id="meme-close" type="button" aria-label="Cerrar">✕</button>
+    <img id="meme-img" alt="">
+    <p id="meme-txt"></p>
+  </div>
+</div>
 
 <button class="dock off" id="dock" type="button" aria-label="Ver nota final">
   <span class="dock-label">Nota final</span>
@@ -748,6 +781,7 @@ function update() {
   de.className = estado.className; de.textContent = estado.textContent;
   hayNota = completos.length > 0;
   syncDock();
+  revisarMeme();
 }
 
 // La barra flotante se muestra solo si hay nota y la tarjeta de resultado no está en pantalla
@@ -762,6 +796,60 @@ if ("IntersectionObserver" in window) {
 document.getElementById("dock").addEventListener("click", () => {
   document.getElementById("resultado").scrollIntoView({ behavior: "smooth", block: "center" });
 });
+
+// Imagen según lo acumulado con 1er y 2do Parcial (con optativo si lo usaron)
+const MEMES = {
+  pasaste:  { src: "imagenes/pasaste.webp",     alt: "Pasaste" },
+  optativo: { src: "imagenes/optativo.webp",    alt: "Con optativo te salvas" },
+  jesus:    { src: "imagenes/jesus.webp",       alt: "I belong to Jesus" },
+  baquero:  { src: "imagenes/baquero.webp",     alt: "Adiós Baquero" },
+  diez:     { src: "imagenes/ni-con-diez.webp", alt: "Ni aunque te saques diez amigo" },
+};
+let memeTimer = null, memeActual = null;
+function casoMeme() {
+  if (!parcialDado("p1") || !parcialDado("p2")) return null;
+  const acum = notaEfectiva("p1") * 0.3 + notaEfectiva("p2") * 0.3;
+  const conOpt = ["p1", "p2"].some(pid => notaEfectiva(pid) !== notaParcial(pid));
+  let key;
+  if (acum >= state.min) key = "pasaste";
+  else if (conOpt && acum >= 3.5) key = "optativo";
+  else if (acum >= 3.5) key = "jesus";
+  else if (acum >= 2.5) key = "baquero";
+  else key = "diez";
+  return { key, acum };
+}
+function revisarMeme() {
+  const c = casoMeme();
+  memeActual = c;
+  document.getElementById("ver-meme").hidden = !c;
+  clearTimeout(memeTimer);
+  if (!c) return;
+  let visto = null;
+  try { visto = localStorage.getItem("emi-meme:" + ID); } catch (e) {}
+  if (visto === c.key) return;
+  // Espera a que termine de escribir antes de mostrarla
+  memeTimer = setTimeout(() => {
+    const ahora = casoMeme();
+    if (!ahora || ahora.key !== c.key) return;
+    try { localStorage.setItem("emi-meme:" + ID, c.key); } catch (e) {}
+    abrirMeme(ahora);
+  }, 1200);
+}
+function abrirMeme(c) {
+  if (!c) return;
+  const m = MEMES[c.key];
+  const img = document.getElementById("meme-img");
+  img.src = m.src; img.alt = m.alt;
+  document.getElementById("meme-txt").textContent =
+    `Llevas ${fmt(c.acum)} acumulado con el 1er y 2do Parcial.`;
+  document.getElementById("meme").hidden = false;
+  document.getElementById("meme-close").focus();
+}
+function cerrarMeme() { document.getElementById("meme").hidden = true; }
+document.getElementById("meme-close").addEventListener("click", cerrarMeme);
+document.getElementById("meme").addEventListener("click", e => { if (e.target.id === "meme") cerrarMeme(); });
+document.addEventListener("keydown", e => { if (e.key === "Escape") cerrarMeme(); });
+document.getElementById("ver-meme").addEventListener("click", () => abrirMeme(memeActual));
 
 function updateOptativo(opt, final, pendientes) {
   const hint = document.getElementById("opt-hint");
