@@ -245,13 +245,6 @@
   }
   #ver-meme[hidden] { display: none; }
   .meme-box p:empty { display: none; }
-  .meme-tag {
-    position: absolute; top: 18px; left: 18px; z-index: 1;
-    background: var(--yellow); color: var(--blue-900); font-weight: 800; font-size: .72rem;
-    letter-spacing: .06em; text-transform: uppercase; padding: 4px 10px; border-radius: 999px;
-    box-shadow: 0 2px 8px rgba(0,0,0,.35);
-  }
-  .meme-tag[hidden] { display: none; }
   @keyframes meme-fade { from { opacity: 0; } }
   @keyframes meme-pop { from { transform: scale(.85); opacity: 0; } }
   @media (prefers-reduced-motion: reduce) { .meme, .meme-box { animation: none; } }
@@ -425,7 +418,6 @@
 <div class="meme" id="meme" hidden role="dialog" aria-modal="true" aria-labelledby="meme-txt">
   <div class="meme-box">
     <button class="meme-close" id="meme-close" type="button" aria-label="Cerrar">✕</button>
-    <span class="meme-tag" id="meme-tag" hidden>📢 Anuncio</span>
     <img id="meme-img" alt="">
     <p id="meme-txt"></p>
   </div>
@@ -851,7 +843,6 @@ function abrirMeme(c) {
   img.src = m.src; img.alt = m.alt;
   document.getElementById("meme-txt").textContent =
     `Llevas ${fmt(c.acum)} acumulado con el 1er y 2do Parcial.`;
-  document.getElementById("meme-tag").hidden = true;
   document.getElementById("meme").hidden = false;
   document.getElementById("meme-close").focus();
 }
@@ -871,7 +862,6 @@ function abrirAnuncio() {
   const img = document.getElementById("meme-img");
   img.src = ANUNCIOS[i].src; img.alt = ANUNCIOS[i].alt;
   document.getElementById("meme-txt").textContent = "";
-  document.getElementById("meme-tag").hidden = false;
   document.getElementById("meme").hidden = false;
   document.getElementById("meme-close").focus();
 }
