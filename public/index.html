@@ -117,7 +117,7 @@
     transition: background .15s;
   }
   .add:hover { background: var(--blue-100); }
-  .avg { font-size: .78rem; font-weight: 500; color: var(--muted); font-variant-numeric: tabular-nums; }
+  .avg { font-size: .78rem; font-weight: 500; color: var(--muted); margin-top: 6px; font-variant-numeric: tabular-nums; }
   .total {
     padding: 12px 16px; border-radius: 14px;
     background: linear-gradient(135deg, var(--blue-900), var(--blue-700));
@@ -130,7 +130,11 @@
   .total input.num::placeholder { color: rgba(255,255,255,.5); }
   .total input.num:hover, .total input.num:focus { border-color: var(--yellow); outline: none; background: rgba(255,255,255,.08); }
   .total input.num.manual { color: #fff; text-decoration: underline wavy var(--yellow) 1px; text-underline-offset: 5px; }
-  .edit-tip { margin-top: 8px; font-size: .78rem; font-weight: 500; color: var(--muted); }
+  .edit-tip {
+    margin-top: 8px; padding: 8px 12px; border-radius: 10px;
+    background: var(--yellow-soft); color: var(--yellow-ink); border-left: 4px solid var(--yellow);
+    font-size: .9rem; font-weight: 600;
+  }
   .hint { font-size: .8rem; color: var(--muted); margin-top: 8px; }
   .hint:empty { display: none; }
   .total input.num.opt { color: var(--yellow); text-decoration: none; }
@@ -278,7 +282,14 @@
     .grid > .card .total-gap { height: 12px; }
     .total { padding: 7px 12px; border-radius: 12px; font-size: .88rem; }
     .total input.num { font-size: 1.25rem; width: 84px; padding: 0 6px; }
-    .edit-tip { font-size: .72rem; margin-top: 6px; }
+    .edit-tip { margin-top: 6px; padding: 5px 9px; font-size: .72rem; border-radius: 8px; border-left-width: 3px; }
+    /* Práctica y Controles lado a lado */
+    .grid > .card.parcial { display: grid; grid-template-columns: 1fr 1fr; column-gap: 12px; align-content: start; }
+    .grid > .card.parcial > * { grid-column: 1 / -1; min-width: 0; }
+    .grid > .card.parcial > [data-sec="practica"], .grid > .card.parcial > [data-sec="controles"] { grid-column: auto; }
+    .note input { width: 44px; }
+    .add { padding: 5px 8px; font-size: .75rem; }
+    .avg { font-size: .68rem; margin-top: 4px; }
     .hint { font-size: .74rem; margin-top: 6px; }
     .hint.opt, .hint.need { font-size: .78rem; padding: 7px 10px; }
     .need-list { gap: 8px; margin-top: 10px; grid-template-columns: minmax(0, 1fr); }
@@ -513,12 +524,12 @@ function render() {
   cont.innerHTML = "";
   PARCIALES.forEach(p => {
     const card = document.createElement("div");
-    card.className = "card";
+    card.className = "card parcial";
     card.innerHTML = `<h2>${p.nombre} <small>${p.peso * 100}%</small></h2>`;
     SECCIONES.forEach(s => {
       const sec = document.createElement("div");
-      sec.className = "section";
-      sec.innerHTML = `<div class="section-head"><span>${s.nombre}</span><span class="avg" id="avg-${p.id}-${s.id}"></span></div>`;
+      sec.className = "section"; sec.dataset.sec = s.id;
+      sec.innerHTML = `<div class="section-head"><span>${s.nombre}</span></div>`;
       const notes = document.createElement("div");
       notes.className = "notes";
       state[p.id][s.id].forEach((val, i) => {
@@ -552,6 +563,9 @@ function render() {
       });
       if (s.multi) notes.appendChild(add);
       sec.appendChild(notes);
+      const a = document.createElement("div");
+      a.className = "avg"; a.id = `avg-${p.id}-${s.id}`;
+      sec.appendChild(a);
       card.appendChild(sec);
       if (s.id === "controles") {
         const sub = document.createElement("div");
@@ -580,7 +594,7 @@ function render() {
     card.appendChild(tot);
     const tip = document.createElement("div");
     tip.className = "edit-tip";
-    tip.textContent = "✎ Toca la nota para escribirla directamente";
+    tip.textContent = "✎ Puedes escribir la nota del parcial directamente";
     card.appendChild(tip);
     const hint = document.createElement("div");
     hint.className = "hint"; hint.id = `hint-${p.id}`;
@@ -600,7 +614,7 @@ function update() {
     SECCIONES.forEach(s => {
       const a = avg(state[p.id][s.id]);
       document.getElementById(`avg-${p.id}-${s.id}`).textContent =
-        a === null ? "" : s.multi ? `Promedio ${fmt(a)} · aporta ${fmt(a * s.peso)}` : `aporta ${fmt(a * s.peso)}`;
+        a === null ? "Sin notas" : `Promedio: ${fmt(a)} → aporta ${fmt(a * s.peso)}`;
     });
     // Práctica (40%) + Controles (60%) = nota del 40% del parcial
     {
